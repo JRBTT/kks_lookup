@@ -51,12 +51,21 @@ def extractor(file_path, sheet_name):
             # Convert the result list to a DataFrame
             result_df = pd.DataFrame(result, columns=["KKS", "Signal", "KKS_Signal", "Address"])
 
-            # Write the DataFrame to an Excel file
-            output_file = "output.xlsx"  # Specify the output file name
+            # Extract the base name of the Excel file (without the directory path)
+            base_file_name = os.path.splitext(os.path.basename(file_path))[0]
+
+            # Create the output folder if it doesn't exist
+            output_folder = "output"
+            if not os.path.exists(output_folder):
+                os.makedirs(output_folder)
+
+            
+            # Create the initial output file name using the sheet name
+            output_file = os.path.join(output_folder, f"{base_file_name}_output.xlsx")
             counter = 1
             while os.path.exists(output_file):
                 # If the file exists, create a new file name with a counter
-                output_file = f"output_{counter}.xlsx"
+                output_file = os.path.join(output_folder, f"{base_file_name}_output_{counter}.xlsx")
                 counter += 1
             result_df.to_excel(output_file, index=False)  # Save without the index column
             print(f"Result successfully written to {output_file}")
