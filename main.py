@@ -5,15 +5,15 @@ import os
 
 
 def extractor(file_path, sheet_name):
-        # Step 1: Read the file name from config.txt
-    with open("config.txt", "r") as config_file:
-        excel_file_name = config_file.readline().strip()
-        sheet_name = config_file.readline().strip()      # Second line: Sheet name
+        # Step 1: Read the file name from config.txt for debugging
+    # with open("config.txt", "r") as config_file:
+    #     excel_file_name = config_file.readline().strip()
+    #     sheet_name = config_file.readline().strip()      # Second line: Sheet name
 
     # Step 2: Load the Excel file using pandas
     try:
         # Assuming the Excel file is in the same directory as the script
-        data = pd.read_excel(excel_file_name, sheet_name=sheet_name)
+        data = pd.read_excel(file_path, sheet_name=sheet_name)
         print("Excel file loaded successfully!")
 
         # Step 3: Process each column to find "Adr" and collect values below it
@@ -68,7 +68,7 @@ def extractor(file_path, sheet_name):
 
 
     except FileNotFoundError:
-        print(f"Error: The file '{excel_file_name}' was not found.")
+        print(f"Error:'{file_path}' was not found.")
     except Exception as e:
         print(f"An error occurred: {e}")
 
@@ -95,6 +95,7 @@ def load_sheet_names(file_path):
 def on_submit():
     """Handle the submit button click."""
     file_path = excel_path_var.get()
+    print(file_path)
     sheet_name = sheet_name_var.get()
     if not file_path or not sheet_name:
         messagebox.showwarning("Warning", "Please select a file and a sheet name.")
