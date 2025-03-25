@@ -14,10 +14,12 @@ def extractor(file_path, sheet_name):
     try:
         # Assuming the Excel file is in the same directory as the script
         data = pd.read_excel(file_path, sheet_name=sheet_name)
+
         print("Excel file loaded successfully!")
 
         # Step 3: Process each column to find "Adr" and collect values below it
         result = []  # List to store the collected values
+        Addr_exist = False
         for idy, column in enumerate(data.columns):
             # print(f"Processing column '{column}'...")
             col_data = data[column]  # Get the column data
@@ -28,6 +30,7 @@ def extractor(file_path, sheet_name):
 
             for idx, value in col_data.items():
                 if value == "Adr.":  # Check if the cell matches "Adr"
+                    Addr_exist = True
                     print(f"Found 'Adr.' in column '{column}' at index {idx}")
                     # Collect all non-NaN values below "Adr"
                     sublist = []
@@ -37,12 +40,16 @@ def extractor(file_path, sheet_name):
                         signal = n_next_col_data[sub_idx]
                         if pd.isna(address):  # Stop at the first NaN
                             break
-                        elif pd.isna(kks):
-                            break
-                        else:
+                        elif not pd.isna(kks):
+                            if pd.isna(signal):
+                                print("signal is empty")
+                                signal = ""
                             kks_signal = kks + "|" + signal
                             result.append([kks, signal, kks_signal, address])
-            
+        if not Addr_exist:
+            return "1"
+        if not result:
+            return "2"         
         # Print the result
         print("Collected values below 'Adr':")
         print(result)
@@ -99,7 +106,7 @@ def load_sheet_names(file_path):
         if sheet_names:
             sheet_name_var.set(sheet_names[0])  # Set the first sheet as default
     except Exception as e:
-        messagebox.showerror("Error", f"Failed to load sheet names: {e}")
+        messagebox.showerror("Error", f"Failed to load sheet names: {e} Check if the file is saved as strict xlsx format. Resave as normal xlsx format and try again.")
 
 def on_submit():
     """Handle the submit button click."""
@@ -111,16 +118,21 @@ def on_submit():
         return
     else:
         file_path = extractor(file_path, sheet_name)
-        messagebox.showinfo("Success, output file created at: ", file_path)
+        if file_path == "1":
+            messagebox.showwarning("Warning", "No 'Adr. column' found in the sheet. Please check the sheet.")
+        elif file_path == "2":
+            messagebox.showwarning("Warning", "No data returned! Please check the sheet.")
+        else:
+            messagebox.showinfo("Success, output file created at: ", file_path)
 
 # Create the main tkinter window
 root = tk.Tk()
 root.title("KKS Extractor")
-
+root.resizable(False, False)
 # File path input
 tk.Label(root, text="Excel File:").grid(row=0, column=0, padx=10, pady=10, sticky="w")
 excel_path_var = tk.StringVar()
-tk.Entry(root, textvariable=excel_path_var, width=50).grid(row=0, column=1, padx=10, pady=10)
+tk.Entry(root, textvariable=excel_path_var, width=50, state="readonly").grid(row=0, column=1, padx=10, pady=10)
 tk.Button(root, text="Browse", command=browse_file).grid(row=0, column=2, padx=10, pady=10)
 
 # Sheet name dropdown

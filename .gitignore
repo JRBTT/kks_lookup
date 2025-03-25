@@ -2,5 +2,5 @@
 venv
 config.txt
 build
-main.spec
+*.spec
 output
