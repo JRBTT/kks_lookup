@@ -4,7 +4,7 @@ from tkinter import filedialog, ttk, messagebox
 import os
 
 
-def extractor(file_path, sheet_name):
+def extractor(file_path, sheet_name, destination):
         # Step 1: Read the file name from config.txt for debugging
     # with open("config.txt", "r") as config_file:
     #     excel_file_name = config_file.readline().strip()
@@ -61,18 +61,18 @@ def extractor(file_path, sheet_name):
             # Extract the base name of the Excel file (without the directory path)
             base_file_name = os.path.splitext(os.path.basename(file_path))[0]
 
-            # Create the output folder if it doesn't exist
-            output_folder = "output"
-            if not os.path.exists(output_folder):
-                os.makedirs(output_folder)
+            # # Create the output folder if it doesn't exist
+            # output_folder = "output"
+            # if not os.path.exists(output_folder):
+            #     os.makedirs(output_folder)
 
             
             # Create the initial output file name using the sheet name
-            output_file = os.path.join(output_folder, f"{base_file_name}_output.xlsx")
+            output_file = os.path.join(destination, f"{base_file_name}_output.xlsx")
             counter = 1
             while os.path.exists(output_file):
                 # If the file exists, create a new file name with a counter
-                output_file = os.path.join(output_folder, f"{base_file_name}_output_{counter}.xlsx")
+                output_file = os.path.join(destination, f"{base_file_name}_output_{counter}.xlsx")
                 counter += 1
             result_df.to_excel(output_file, index=False)  # Save without the index column
             print(f"Result successfully written to {output_file}")
@@ -113,11 +113,12 @@ def on_submit():
     file_path = excel_path_var.get()
     print(file_path)
     sheet_name = sheet_name_var.get()
+    destination = destination_path_var.get()
     if not file_path or not sheet_name:
         messagebox.showwarning("Warning", "Please select a file and a sheet name.")
         return
     else:
-        file_path = extractor(file_path, sheet_name)
+        file_path = extractor(file_path, sheet_name, destination)
         if file_path == "1":
             messagebox.showwarning("Warning", "No 'Adr. column' found in the sheet. Please check the sheet.")
         elif file_path == "2":
@@ -125,24 +126,37 @@ def on_submit():
         else:
             messagebox.showinfo("Success, output file created at: ", file_path)
 
+def browse_destination():
+    """Open a file dialog to select a destination folder."""
+    folder_path = filedialog.askdirectory(title="Select Destination Folder")
+    if folder_path:
+        destination_path_var.set(folder_path)  # Set the folder path in the entry widget
+
 # Create the main tkinter window
 root = tk.Tk()
 root.title("KKS Extractor")
 root.resizable(False, False)
+
 # File path input
 tk.Label(root, text="Excel File:").grid(row=0, column=0, padx=10, pady=10, sticky="w")
 excel_path_var = tk.StringVar()
 tk.Entry(root, textvariable=excel_path_var, width=50, state="readonly").grid(row=0, column=1, padx=10, pady=10)
 tk.Button(root, text="Browse", command=browse_file).grid(row=0, column=2, padx=10, pady=10)
 
+# Destination folder input
+tk.Label(root, text="Destination Folder:").grid(row=1, column=0, padx=10, pady=10, sticky="w")
+destination_path_var = tk.StringVar()
+tk.Entry(root, textvariable=destination_path_var, width=50, state="readonly").grid(row=1, column=1, padx=10, pady=10)
+tk.Button(root, text="Browse", command=browse_destination).grid(row=1, column=2, padx=10, pady=10)
+
 # Sheet name dropdown
-tk.Label(root, text="Sheet Name:").grid(row=1, column=0, padx=10, pady=10, sticky="w")
+tk.Label(root, text="Sheet Name:").grid(row=2, column=0, padx=10, pady=10, sticky="w")
 sheet_name_var = tk.StringVar()
 sheet_name_dropdown = ttk.Combobox(root, textvariable=sheet_name_var, state="readonly", width=47)
-sheet_name_dropdown.grid(row=1, column=1, padx=10, pady=10)
+sheet_name_dropdown.grid(row=2, column=1, padx=10, pady=10)
 
 # Submit button
-tk.Button(root, text="Submit", command=on_submit).grid(row=2, column=1, pady=20)
+tk.Button(root, text="Submit", command=on_submit).grid(row=3, column=1, pady=20)
 
 # Run the tkinter main loop
 root.mainloop()
