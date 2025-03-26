@@ -68,11 +68,11 @@ def extractor(file_path, sheet_name, destination):
 
             
             # Create the initial output file name using the sheet name
-            output_file = os.path.join(destination, f"{base_file_name}_output.xlsx")
+            output_file = os.path.join(destination, f"{base_file_name}_{sheet_name}_OUTPUT.xlsx")
             counter = 1
             while os.path.exists(output_file):
                 # If the file exists, create a new file name with a counter
-                output_file = os.path.join(destination, f"{base_file_name}_output_{counter}.xlsx")
+                output_file = os.path.join(destination, f"{base_file_name}_{sheet_name}_OUTPUT_{counter}.xlsx")
                 counter += 1
             result_df.to_excel(output_file, index=False)  # Save without the index column
             print(f"Result successfully written to {output_file}")
